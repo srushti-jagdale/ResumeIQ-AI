@@ -2,9 +2,22 @@ package com.resumeiqai.service;
 
 public class ResumeAnalyzer {
 
-    public String analyzeResume(String resumeText) {
+    private final SkillAnalyzer skillAnalyzer;
+    private final ResumeScorer resumeScorer;
+    private final JobRoleRecommender jobRoleRecommender;
+    private final ResumeSuggestionGenerator suggestionGenerator;
+    private final ResumeFeedbackGenerator feedbackGenerator;
 
-        StringBuilder report = new StringBuilder();
+    public ResumeAnalyzer() {
+
+        skillAnalyzer = new SkillAnalyzer();
+        resumeScorer = new ResumeScorer();
+        jobRoleRecommender = new JobRoleRecommender();
+        suggestionGenerator = new ResumeSuggestionGenerator();
+        feedbackGenerator = new ResumeFeedbackGenerator();
+    }
+
+    public String analyzeResume(String resumeText) {
 
         // =====================================================
         // SAFETY CHECK
@@ -17,442 +30,119 @@ public class ResumeAnalyzer {
         String text = resumeText.toLowerCase();
 
         // =====================================================
-        // TECHNICAL SKILLS
-        // Maximum = 50 points
+        // DETECT CAREER AREA
         // =====================================================
 
-        String[] skills = {
-                "Docker",
-                "Java",
-                "MySQL",
-                "HTML",
-                "CSS",
-                "Git",
-                "Spring Boot",
-                "JavaScript",
-                "React",
-                "Python",
-                "SQL"
-        };
+        String careerArea = detectCareerArea(text);
 
-        int foundSkills = 0;
-        int totalSkills = skills.length;
+        // =====================================================
+        // ANALYZE SKILLS
+        // =====================================================
 
-        StringBuilder skillsFound =
-                new StringBuilder();
+        String[] skills =
+                skillAnalyzer.getSkillsForCareer(careerArea);
 
-        StringBuilder missingSkills =
-                new StringBuilder();
+        int foundSkills =
+                skillAnalyzer.countFoundSkills(
+                        resumeText,
+                        skills
+                );
 
-        for (String skill : skills) {
+        String skillsFound =
+                skillAnalyzer.getSkillsFound(
+                        resumeText,
+                        skills
+                );
 
-            if (text.contains(skill.toLowerCase())) {
+        String missingSkills =
+                skillAnalyzer.getMissingSkills(
+                        resumeText,
+                        skills
+                );
 
-                skillsFound
-                        .append("✔ ")
-                        .append(skill)
-                        .append("\n");
-
-                foundSkills++;
-
-            } else {
-
-                missingSkills
-                        .append("✘ ")
-                        .append(skill)
-                        .append("\n");
-            }
-        }
-
-        /*
-         * 11 skills = 50 points maximum.
-         */
+        // =====================================================
+        // CALCULATE SCORE
+        // =====================================================
 
         int skillScore =
-                (foundSkills * 50) / totalSkills;
-
-        // =====================================================
-        // EDUCATION
-        // Maximum = 15 points
-        // =====================================================
-
-        int educationScore = 0;
-
-        if (containsAny(
-                text,
-                "education",
-                "bachelor",
-                "b.tech",
-                "b.e",
-                "bsc",
-                "b.sc",
-                "bca",
-                "mca",
-                "m.tech",
-                "mca",
-                "diploma",
-                "degree",
-                "university",
-                "college"
-        )) {
-
-            educationScore = 15;
-
-        }
-
-        // =====================================================
-        // PROJECTS
-        // Maximum = 10 points
-        // =====================================================
-
-        int projectScore = 0;
-
-        if (containsAny(
-                text,
-                "project",
-                "projects",
-                "developed",
-                "developing",
-                "application",
-                "system",
-                "website"
-        )) {
-
-            projectScore = 10;
-
-        }
-
-        // =====================================================
-        // EXPERIENCE / INTERNSHIP
-        // Maximum = 10 points
-        // =====================================================
-
-        int experienceScore = 0;
-
-        if (containsAny(
-                text,
-                "experience",
-                "internship",
-                "intern",
-                "work experience",
-                "employment",
-                "worked",
-                "developer intern",
-                "software engineer"
-        )) {
-
-            experienceScore = 10;
-
-        }
-
-        // =====================================================
-        // CERTIFICATIONS
-        // Maximum = 5 points
-        // =====================================================
-
-        int certificationScore = 0;
-
-        if (containsAny(
-                text,
-                "certification",
-                "certified",
-                "certificate",
-                "course",
-                "coursera",
-                "udemy",
-                "nptel"
-        )) {
-
-            certificationScore = 5;
-
-        }
-
-        // =====================================================
-        // CONTACT INFORMATION
-        // Maximum = 5 points
-        // =====================================================
-
-        int contactScore = 0;
-
-        boolean hasEmail =
-                text.matches(
-                        "(?s).*\\b[\\w.%+-]+@[\\w.-]+\\.[a-z]{2,}\\b.*"
+                resumeScorer.calculateSkillScore(
+                        resumeText,
+                        skills
                 );
 
-        boolean hasPhone =
-                text.matches(
-                        "(?s).*\\b\\d{10}\\b.*"
-                );
+        int educationScore =
+                resumeScorer.calculateEducationScore(text);
 
-        if (hasEmail) {
-            contactScore += 3;
-        }
+        int projectScore =
+                resumeScorer.calculateProjectScore(text);
 
-        if (hasPhone) {
-            contactScore += 2;
-        }
+        int experienceScore =
+                resumeScorer.calculateExperienceScore(text);
 
-        // =====================================================
-        // RESUME STRUCTURE
-        // Maximum = 5 points
-        // =====================================================
+        int certificationScore =
+                resumeScorer.calculateCertificationScore(text);
 
-        int structureScore = 0;
+        int contactScore =
+                resumeScorer.calculateContactScore(text);
 
-        int sectionCount = 0;
-
-        if (containsAny(
-                text,
-                "objective",
-                "summary",
-                "profile"
-        )) {
-
-            sectionCount++;
-
-        }
-
-        if (containsAny(
-                text,
-                "education"
-        )) {
-
-            sectionCount++;
-
-        }
-
-        if (containsAny(
-                text,
-                "skills",
-                "technical skills"
-        )) {
-
-            sectionCount++;
-
-        }
-
-        if (containsAny(
-                text,
-                "projects"
-        )) {
-
-            sectionCount++;
-
-        }
-
-        if (containsAny(
-                text,
-                "experience",
-                "internship"
-        )) {
-
-            sectionCount++;
-
-        }
-
-        if (sectionCount >= 4) {
-
-            structureScore = 5;
-
-        } else if (sectionCount >= 2) {
-
-            structureScore = 3;
-
-        } else if (sectionCount == 1) {
-
-            structureScore = 1;
-
-        }
-
-        // =====================================================
-        // FINAL SCORE
-        // =====================================================
+        int structureScore =
+                resumeScorer.calculateStructureScore(text);
 
         int resumeScore =
-                skillScore
-                        + educationScore
-                        + projectScore
-                        + experienceScore
-                        + certificationScore
-                        + contactScore
-                        + structureScore;
-
-        // Make absolutely sure score stays between 0 and 100.
-
-        if (resumeScore > 100) {
-            resumeScore = 100;
-        }
-
-        if (resumeScore < 0) {
-            resumeScore = 0;
-        }
+                resumeScorer.calculateFinalScore(
+                        skillScore,
+                        educationScore,
+                        projectScore,
+                        experienceScore,
+                        certificationScore,
+                        contactScore,
+                        structureScore
+                );
 
         // =====================================================
-        // JOB ROLE RECOMMENDATIONS
+        // JOB RECOMMENDATIONS
         // =====================================================
 
-        StringBuilder recommendedRoles =
-                new StringBuilder();
-
-        // Java Backend Developer
-
-        if (text.contains("java")
-                && text.contains("mysql")
-                && text.contains("spring boot")) {
-
-            recommendedRoles.append(
-                    "💼 Java Backend Developer\n"
-            );
-        }
-
-        // Frontend Developer
-
-        if (text.contains("html")
-                && text.contains("css")
-                && text.contains("javascript")
-                && text.contains("react")) {
-
-            recommendedRoles.append(
-                    "💼 Frontend Developer\n"
-            );
-        }
-
-        // Full Stack Java Developer
-
-        if (text.contains("java")
-                && text.contains("spring boot")
-                && text.contains("html")
-                && text.contains("css")
-                && text.contains("javascript")
-                && text.contains("react")) {
-
-            recommendedRoles.append(
-                    "💼 Full Stack Java Developer\n"
-            );
-        }
-
-        // Python Developer
-
-        if (text.contains("python")) {
-
-            recommendedRoles.append(
-                    "💼 Python Developer\n"
-            );
-        }
-
-        // Database Developer
-
-        if (text.contains("mysql")
-                && text.contains("sql")) {
-
-            recommendedRoles.append(
-                    "💼 Database Developer\n"
-            );
-        }
-
-        // If no role found
-
-        if (recommendedRoles.length() == 0) {
-
-            recommendedRoles.append(
-                    "No suitable job role found.\n"
-            );
-        }
+        String recommendedRoles =
+                jobRoleRecommender.recommendRoles(
+                        resumeText
+                );
 
         // =====================================================
         // SUGGESTIONS
         // =====================================================
 
-        StringBuilder suggestions =
-                new StringBuilder();
+        String suggestions =
+                suggestionGenerator.generateSuggestions(
+                        resumeText,
+                        careerArea
+                );
 
-        if (!text.contains("docker")) {
+        // =====================================================
+        // AI CAREER FEEDBACK
+        // =====================================================
 
-            suggestions.append(
-                    "• Learn Docker for Java deployment.\n"
-            );
-        }
-
-        if (!text.contains("git")) {
-
-            suggestions.append(
-                    "• Learn Git for version control.\n"
-            );
-        }
-
-        if (!text.contains("html")) {
-
-            suggestions.append(
-                    "• Learn HTML for web development.\n"
-            );
-        }
-
-        if (!text.contains("css")) {
-
-            suggestions.append(
-                    "• Learn CSS to improve UI design.\n"
-            );
-        }
-
-        if (!text.contains("javascript")) {
-
-            suggestions.append(
-                    "• Learn JavaScript for interactive websites.\n"
-            );
-        }
-
-        if (!text.contains("react")) {
-
-            suggestions.append(
-                    "• Learn React for modern frontend development.\n"
-            );
-        }
-
-        if (!text.contains("python")) {
-
-            suggestions.append(
-                    "• Learn Python for automation and AI.\n"
-            );
-        }
-
-        if (!text.contains("spring boot")) {
-
-            suggestions.append(
-                    "• Learn Spring Boot for Java backend development.\n"
-            );
-        }
-
-        if (!text.contains("project")) {
-
-            suggestions.append(
-                    "• Add practical projects to demonstrate your skills.\n"
-            );
-        }
-
-        if (!text.contains("certification")) {
-
-            suggestions.append(
-                    "• Consider adding relevant technical certifications.\n"
-            );
-        }
-
-        if (!hasEmail || !hasPhone) {
-
-            suggestions.append(
-                    "• Make sure your resume contains complete contact information.\n"
-            );
-        }
+        String feedback =
+                feedbackGenerator.generateFeedback(
+                        resumeText
+                );
 
         // =====================================================
         // BUILD REPORT
         // =====================================================
 
+        StringBuilder report =
+                new StringBuilder();
+
         report.append(
                 "===== Resume Analysis =====\n\n"
         );
 
-        // IMPORTANT:
-        // MainFrame expects this exact format.
+        report.append(
+                        "Career Area : "
+                )
+                .append(careerArea)
+                .append("\n\n");
 
         report.append(
                         "Resume Score : "
@@ -511,40 +201,39 @@ public class ResumeAnalyzer {
                 .append("/5\n\n");
 
         // =====================================================
-        // SKILLS FOUND
+        // SKILLS
         // =====================================================
 
         report.append(
                 "Skills Found:\n"
         );
 
-        report.append(
-                skillsFound
-        );
-
-        // =====================================================
-        // MISSING SKILLS
-        // =====================================================
+        report.append(skillsFound);
 
         report.append(
                 "\nMissing Skills:\n"
         );
 
-        report.append(
-                missingSkills
-        );
+        report.append(missingSkills);
 
         // =====================================================
-        // RECOMMENDED ROLES
+        // JOB ROLES
         // =====================================================
 
         report.append(
                 "\nRecommended Job Roles:\n"
         );
 
-        report.append(
-                recommendedRoles
-        );
+        if (recommendedRoles.isEmpty()) {
+
+            report.append(
+                    "No suitable job role found.\n"
+            );
+
+        } else {
+
+            report.append(recommendedRoles);
+        }
 
         // =====================================================
         // SUGGESTIONS
@@ -554,7 +243,7 @@ public class ResumeAnalyzer {
                 "\nSuggestions:\n"
         );
 
-        if (suggestions.length() == 0) {
+        if (suggestions.isEmpty()) {
 
             report.append(
                     "• Your resume contains most of the recommended skills and sections.\n"
@@ -562,50 +251,219 @@ public class ResumeAnalyzer {
 
         } else {
 
-            report.append(
-                    suggestions
-            );
+            report.append(suggestions);
         }
 
         // =====================================================
-        // AI CAREER FEEDBACK
+        // AI FEEDBACK
         // =====================================================
 
-        ResumeFeedbackGenerator feedbackGenerator =
-                new ResumeFeedbackGenerator();
-
-        report.append(
-                feedbackGenerator.generateFeedback(
-                        resumeText
-                )
-        );
-
-        // =====================================================
-        // RETURN REPORT
-        // =====================================================
+        report.append(feedback);
 
         return report.toString();
     }
 
     // =========================================================
-    // HELPER METHOD
+    // CAREER DETECTION
     // =========================================================
 
-    private boolean containsAny(
-            String text,
-            String... keywords
-    ) {
+    private String detectCareerArea(String text) {
 
-        for (String keyword : keywords) {
+        int dataAnalyticsScore = 0;
+        int javaScore = 0;
+        int frontendScore = 0;
+        int pythonAIScore = 0;
+        int databaseScore = 0;
 
-            if (text.contains(
-                    keyword.toLowerCase()
-            )) {
+        // -----------------------------------------------------
+        // DATA ANALYTICS
+        // -----------------------------------------------------
 
-                return true;
-            }
+        if (text.contains("data analyst")) {
+            dataAnalyticsScore += 5;
         }
 
-        return false;
+        if (text.contains("data analytics")) {
+            dataAnalyticsScore += 5;
+        }
+
+        if (text.contains("pandas")) {
+            dataAnalyticsScore += 3;
+        }
+
+        if (text.contains("power bi")) {
+            dataAnalyticsScore += 3;
+        }
+
+        if (text.contains("tableau")) {
+            dataAnalyticsScore += 3;
+        }
+
+        if (text.contains("data visualization")) {
+            dataAnalyticsScore += 3;
+        }
+
+        if (text.contains("statistics")) {
+            dataAnalyticsScore += 2;
+        }
+
+        if (text.contains("excel")) {
+            dataAnalyticsScore += 2;
+        }
+
+        // -----------------------------------------------------
+        // JAVA BACKEND
+        // -----------------------------------------------------
+
+        if (text.contains("java")) {
+            javaScore += 4;
+        }
+
+        if (text.contains("spring boot")) {
+            javaScore += 5;
+        }
+
+        if (text.contains("jdbc")) {
+            javaScore += 3;
+        }
+
+        if (text.contains("rest api")
+                || text.contains("restful api")) {
+
+            javaScore += 3;
+        }
+
+        if (text.contains("maven")) {
+            javaScore += 2;
+        }
+
+        // -----------------------------------------------------
+        // FRONTEND
+        // -----------------------------------------------------
+
+        if (text.contains("html")) {
+            frontendScore += 3;
+        }
+
+        if (text.contains("css")) {
+            frontendScore += 3;
+        }
+
+        if (text.contains("javascript")) {
+            frontendScore += 4;
+        }
+
+        if (text.contains("react")) {
+            frontendScore += 5;
+        }
+
+        if (text.contains("frontend")) {
+            frontendScore += 4;
+        }
+
+        if (text.contains("web development")) {
+            frontendScore += 3;
+        }
+
+        // -----------------------------------------------------
+        // PYTHON / AI
+        // -----------------------------------------------------
+
+        if (text.contains("python")) {
+            pythonAIScore += 4;
+        }
+
+        if (text.contains("machine learning")) {
+            pythonAIScore += 5;
+        }
+
+        if (text.contains("artificial intelligence")
+                || text.contains(" ai ")) {
+
+            pythonAIScore += 3;
+        }
+
+        if (text.contains("tensorflow")) {
+            pythonAIScore += 4;
+        }
+
+        if (text.contains("scikit-learn")
+                || text.contains("sklearn")) {
+
+            pythonAIScore += 4;
+        }
+
+        if (text.contains("numpy")) {
+            pythonAIScore += 2;
+        }
+
+        // -----------------------------------------------------
+        // DATABASE
+        // -----------------------------------------------------
+
+        if (text.contains("sql")) {
+            databaseScore += 4;
+        }
+
+        if (text.contains("mysql")) {
+            databaseScore += 4;
+        }
+
+        if (text.contains("postgresql")) {
+            databaseScore += 4;
+        }
+
+        if (text.contains("database design")) {
+            databaseScore += 4;
+        }
+
+        if (text.contains("database management")) {
+            databaseScore += 4;
+        }
+
+        // =====================================================
+        // FIND HIGHEST SCORE
+        // =====================================================
+
+        int highestScore =
+                Math.max(
+                        dataAnalyticsScore,
+                        Math.max(
+                                javaScore,
+                                Math.max(
+                                        frontendScore,
+                                        Math.max(
+                                                pythonAIScore,
+                                                databaseScore
+                                        )
+                                )
+                        )
+                );
+
+        // =====================================================
+        // DEFAULT
+        // =====================================================
+
+        if (highestScore == 0) {
+            return "General Software Development";
+        }
+
+        if (dataAnalyticsScore == highestScore) {
+            return "Data Analytics";
+        }
+
+        if (javaScore == highestScore) {
+            return "Java Backend Development";
+        }
+
+        if (frontendScore == highestScore) {
+            return "Frontend Development";
+        }
+
+        if (pythonAIScore == highestScore) {
+            return "Python / AI";
+        }
+
+        return "Database Development";
     }
 }
