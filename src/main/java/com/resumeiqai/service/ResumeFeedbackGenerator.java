@@ -4,31 +4,17 @@ public class ResumeFeedbackGenerator {
 
     public String generateFeedback(String resumeText) {
 
-        StringBuilder feedback = new StringBuilder();
-
         if (resumeText == null) {
             resumeText = "";
         }
 
         String text = resumeText.toLowerCase();
 
-        // =====================================================
-        // DETECT CAREER PATH
-        // =====================================================
+        StringBuilder feedback = new StringBuilder();
 
-        boolean javaPath =
-                text.contains("java")
-                        && (text.contains("spring boot")
-                        || text.contains("backend")
-                        || text.contains("rest api"));
-
-        boolean dataPath =
-                text.contains("python")
-                        && (text.contains("pandas")
-                        || text.contains("data analyst")
-                        || text.contains("data analysis")
-                        || text.contains("power bi")
-                        || text.contains("data visualization"));
+        // =====================================================
+        // CAREER PATH DETECTION
+        // =====================================================
 
         boolean frontendPath =
                 text.contains("html")
@@ -36,12 +22,47 @@ public class ResumeFeedbackGenerator {
                         && (text.contains("javascript")
                         || text.contains("react"));
 
-        boolean fullStackPath =
+        boolean strongBackendPath =
                 text.contains("java")
                         && text.contains("spring boot")
+                        && text.contains("mysql")
+                        && text.contains("rest api");
+
+        boolean fullStackPath =
+                strongBackendPath
                         && text.contains("html")
                         && text.contains("css")
-                        && text.contains("javascript");
+                        && text.contains("javascript")
+                        && text.contains("react");
+
+        // =====================================================
+        // PYTHON / AI PATH
+        // =====================================================
+
+        boolean pythonAIPath =
+                text.contains("python")
+                        && (
+                        text.contains("machine learning")
+                                || text.contains("scikit-learn")
+                                || text.contains("tensorflow")
+                                || text.contains("artificial intelligence")
+                                || text.contains("deep learning")
+                );
+
+        // =====================================================
+        // DATA ANALYTICS PATH
+        // =====================================================
+
+        boolean dataPath =
+                text.contains("python")
+                        && (
+                        text.contains("power bi")
+                                || text.contains("tableau")
+                                || text.contains("data analyst")
+                                || text.contains("data analytics")
+                                || text.contains("data analysis")
+                                || text.contains("data visualization")
+                );
 
         // =====================================================
         // HEADER
@@ -57,31 +78,191 @@ public class ResumeFeedbackGenerator {
 
         feedback.append("💪 Resume Strengths:\n");
 
-        if (javaPath) {
+        // =====================================================
+        // FULL STACK
+        // =====================================================
+
+        if (fullStackPath) {
 
             feedback.append(
-                    "✔ Strong Java backend foundation.\n"
+                    "✔ Strong full-stack development foundation.\n"
             );
 
-            if (text.contains("spring boot")) {
-                feedback.append(
-                        "✔ Spring Boot knowledge detected.\n"
-                );
-            }
+            feedback.append(
+                    "✔ Java and Spring Boot skills detected.\n"
+            );
+
+            feedback.append(
+                    "✔ HTML, CSS, JavaScript and React skills detected.\n"
+            );
 
             if (text.contains("rest api")) {
+
                 feedback.append(
                         "✔ REST API experience detected.\n"
                 );
             }
 
-        } else if (dataPath) {
+            if (text.contains("git")) {
+
+                feedback.append(
+                        "✔ Git version control knowledge detected.\n"
+                );
+            }
+
+        }
+
+        // =====================================================
+        // FRONTEND
+        // =====================================================
+
+        else if (frontendPath) {
+
+            feedback.append(
+                    "✔ Strong frontend development foundation.\n"
+            );
+
+            feedback.append(
+                    "✔ HTML and CSS skills detected.\n"
+            );
+
+            if (text.contains("javascript")) {
+
+                feedback.append(
+                        "✔ JavaScript skills detected.\n"
+                );
+            }
+
+            if (text.contains("react")) {
+
+                feedback.append(
+                        "✔ React development skills detected.\n"
+                );
+            }
+
+            if (text.contains("git")) {
+
+                feedback.append(
+                        "✔ Git version control knowledge detected.\n"
+                );
+            }
+
+            if (text.contains("bootstrap")) {
+
+                feedback.append(
+                        "✔ Bootstrap framework knowledge detected.\n"
+                );
+            }
+
+        }
+
+        // =====================================================
+        // JAVA BACKEND
+        // =====================================================
+
+        else if (strongBackendPath) {
+
+            feedback.append(
+                    "✔ Strong Java backend foundation.\n"
+            );
+
+            feedback.append(
+                    "✔ Spring Boot knowledge detected.\n"
+            );
+
+            feedback.append(
+                    "✔ MySQL and database integration skills detected.\n"
+            );
+
+            feedback.append(
+                    "✔ REST API experience detected.\n"
+            );
+
+            if (text.contains("git")) {
+
+                feedback.append(
+                        "✔ Git version control knowledge detected.\n"
+                );
+            }
+
+        }
+
+        // =====================================================
+        // PYTHON / AI
+        // IMPORTANT: THIS MUST COME BEFORE dataPath
+        // =====================================================
+
+        else if (pythonAIPath) {
+
+            feedback.append(
+                    "✔ Strong Python and AI/ML development foundation.\n"
+            );
+
+            if (text.contains("machine learning")) {
+
+                feedback.append(
+                        "✔ Machine Learning skills detected.\n"
+                );
+            }
+
+            if (text.contains("pandas")) {
+
+                feedback.append(
+                        "✔ Pandas and data processing skills detected.\n"
+                );
+            }
+
+            if (text.contains("numpy")) {
+
+                feedback.append(
+                        "✔ NumPy numerical computing skills detected.\n"
+                );
+            }
+
+            if (text.contains("scikit-learn")
+                    || text.contains("sklearn")) {
+
+                feedback.append(
+                        "✔ Scikit-learn machine learning skills detected.\n"
+                );
+            }
+
+            if (text.contains("tensorflow")) {
+
+                feedback.append(
+                        "✔ TensorFlow/deep learning skills detected.\n"
+                );
+            }
+
+            if (text.contains("sql")
+                    || text.contains("mysql")) {
+
+                feedback.append(
+                        "✔ SQL and database skills detected.\n"
+                );
+            }
+
+            if (text.contains("git")) {
+
+                feedback.append(
+                        "✔ Git version control knowledge detected.\n"
+                );
+            }
+
+        }
+
+        // =====================================================
+        // DATA ANALYTICS
+        // =====================================================
+
+        else if (dataPath) {
 
             feedback.append(
                     "✔ Strong Python and data analysis foundation.\n"
             );
 
             if (text.contains("pandas")) {
+
                 feedback.append(
                         "✔ Pandas/data manipulation skills detected.\n"
                 );
@@ -98,43 +279,41 @@ public class ResumeFeedbackGenerator {
             if (text.contains("power bi")) {
 
                 feedback.append(
-                        "✔ Data visualization/Power BI experience detected.\n"
+                        "✔ Power BI/data visualization experience detected.\n"
                 );
             }
 
-        } else if (frontendPath) {
+            if (text.contains("tableau")) {
 
-            feedback.append(
-                    "✔ Strong frontend development foundation.\n"
-            );
-
-            if (text.contains("javascript")) {
                 feedback.append(
-                        "✔ JavaScript skills detected.\n"
+                        "✔ Tableau data visualization skills detected.\n"
                 );
             }
 
-            if (text.contains("react")) {
+            if (text.contains("statistics")) {
+
                 feedback.append(
-                        "✔ React development skills detected.\n"
+                        "✔ Statistics knowledge detected.\n"
                 );
             }
 
-        } else if (fullStackPath) {
+        }
 
-            feedback.append(
-                    "✔ Full-stack development skills detected.\n"
-            );
+        // =====================================================
+        // GENERAL
+        // =====================================================
 
-        } else {
+        else {
 
             if (text.contains("java")) {
+
                 feedback.append(
                         "✔ Java knowledge detected.\n"
                 );
             }
 
             if (text.contains("python")) {
+
                 feedback.append(
                         "✔ Python knowledge detected.\n"
                 );
@@ -154,7 +333,6 @@ public class ResumeFeedbackGenerator {
                         "✔ Version control knowledge detected.\n"
                 );
             }
-
         }
 
         feedback.append("\n");
@@ -165,74 +343,166 @@ public class ResumeFeedbackGenerator {
 
         feedback.append("⚠ Resume Weaknesses:\n");
 
-        if (javaPath) {
+        // =====================================================
+        // FULL STACK WEAKNESSES
+        // =====================================================
 
-            if (!text.contains("git")) {
-                feedback.append(
-                        "✘ Git not found.\n"
-                );
-            }
+        if (fullStackPath) {
 
             if (!text.contains("docker")) {
+
                 feedback.append(
                         "✘ Docker not found.\n"
                 );
             }
 
             if (!text.contains("rest api")) {
+
                 feedback.append(
-                        "✘ REST API experience not found.\n"
+                        "✘ REST API not found.\n"
+                );
+            }
+        }
+
+        // =====================================================
+        // FRONTEND WEAKNESSES
+        // =====================================================
+
+        else if (frontendPath) {
+
+            if (!text.contains("ui design")) {
+
+                feedback.append(
+                        "✘ UI Design not found.\n"
                 );
             }
 
-        } else if (dataPath) {
+            if (!text.contains("responsive design")) {
 
-            if (!text.contains("pandas")) {
                 feedback.append(
-                        "✘ Pandas not found.\n"
+                        "✘ Responsive Design not found.\n"
                 );
             }
-
-            if (!text.contains("power bi")) {
-                feedback.append(
-                        "✘ Power BI not found.\n"
-                );
-            }
-
-            if (!text.contains("statistics")) {
-                feedback.append(
-                        "✘ Statistics knowledge not found.\n"
-                );
-            }
-
-        } else if (frontendPath) {
-
-            if (!text.contains("javascript")) {
-                feedback.append(
-                        "✘ JavaScript not found.\n"
-                );
-            }
-
-            if (!text.contains("react")) {
-                feedback.append(
-                        "✘ React not found.\n"
-                );
-            }
-
-        } else {
 
             if (!text.contains("git")) {
+
+                feedback.append(
+                        "✘ Git not found.\n"
+                );
+            }
+        }
+
+        // =====================================================
+        // JAVA BACKEND WEAKNESSES
+        // =====================================================
+
+        else if (strongBackendPath) {
+
+            if (!text.contains("git")) {
+
                 feedback.append(
                         "✘ Git not found.\n"
                 );
             }
 
             if (!text.contains("docker")) {
+
                 feedback.append(
                         "✘ Docker not found.\n"
                 );
             }
 
+            if (!text.contains("maven")) {
+
+                feedback.append(
+                        "✘ Maven not found.\n"
+                );
+            }
+        }
+
+        // =====================================================
+        // PYTHON / AI WEAKNESSES
+        // =====================================================
+
+        else if (pythonAIPath) {
+
+            if (!text.contains("machine learning")) {
+
+                feedback.append(
+                        "✘ Machine Learning not found.\n"
+                );
+            }
+
+            if (!text.contains("scikit-learn")
+                    && !text.contains("sklearn")) {
+
+                feedback.append(
+                        "✘ Scikit-learn not found.\n"
+                );
+            }
+
+            if (!text.contains("tensorflow")) {
+
+                feedback.append(
+                        "✘ TensorFlow not found.\n"
+                );
+            }
+
+            if (!text.contains("git")) {
+
+                feedback.append(
+                        "✘ Git not found.\n"
+                );
+            }
+        }
+
+        // =====================================================
+        // DATA ANALYTICS WEAKNESSES
+        // =====================================================
+
+        else if (dataPath) {
+
+            if (!text.contains("pandas")) {
+
+                feedback.append(
+                        "✘ Pandas not found.\n"
+                );
+            }
+
+            if (!text.contains("power bi")) {
+
+                feedback.append(
+                        "✘ Power BI not found.\n"
+                );
+            }
+
+            if (!text.contains("statistics")) {
+
+                feedback.append(
+                        "✘ Statistics knowledge not found.\n"
+                );
+            }
+        }
+
+        // =====================================================
+        // GENERAL WEAKNESSES
+        // =====================================================
+
+        else {
+
+            if (!text.contains("git")) {
+
+                feedback.append(
+                        "✘ Git not found.\n"
+                );
+            }
+
+            if (!text.contains("docker")) {
+
+                feedback.append(
+                        "✘ Docker not found.\n"
+                );
+            }
         }
 
         feedback.append("\n");
@@ -243,17 +513,41 @@ public class ResumeFeedbackGenerator {
 
         feedback.append("🚀 Career Readiness:\n");
 
+        // =====================================================
+        // FULL STACK
+        // =====================================================
+
         if (fullStackPath) {
 
             feedback.append(
-                    "Intermediate Full Stack Java Developer.\n"
+                    "Advanced Full Stack Development candidate.\n"
             );
 
             feedback.append(
-                    "Suitable for internships and junior developer roles.\n"
+                    "Suitable for internships and junior full-stack roles.\n"
+            );
+        }
+
+        // =====================================================
+        // FRONTEND
+        // =====================================================
+
+        else if (frontendPath) {
+
+            feedback.append(
+                    "Intermediate Frontend Developer candidate.\n"
             );
 
-        } else if (javaPath) {
+            feedback.append(
+                    "Suitable for frontend internships and junior frontend roles.\n"
+            );
+        }
+
+        // =====================================================
+        // JAVA BACKEND
+        // =====================================================
+
+        else if (strongBackendPath) {
 
             feedback.append(
                     "Intermediate Java Backend Developer.\n"
@@ -262,8 +556,28 @@ public class ResumeFeedbackGenerator {
             feedback.append(
                     "Suitable for internships and junior backend roles.\n"
             );
+        }
 
-        } else if (dataPath) {
+        // =====================================================
+        // PYTHON / AI
+        // =====================================================
+
+        else if (pythonAIPath) {
+
+            feedback.append(
+                    "Intermediate Python / AI Developer candidate.\n"
+            );
+
+            feedback.append(
+                    "Suitable for Python, Machine Learning and AI internships and junior roles.\n"
+            );
+        }
+
+        // =====================================================
+        // DATA ANALYTICS
+        // =====================================================
+
+        else if (dataPath) {
 
             feedback.append(
                     "Intermediate Data Analytics candidate.\n"
@@ -272,18 +586,13 @@ public class ResumeFeedbackGenerator {
             feedback.append(
                     "Suitable for data analyst internships and entry-level roles.\n"
             );
+        }
 
-        } else if (frontendPath) {
+        // =====================================================
+        // GENERAL
+        // =====================================================
 
-            feedback.append(
-                    "Intermediate Frontend Developer candidate.\n"
-            );
-
-            feedback.append(
-                    "Suitable for frontend internships and junior roles.\n"
-            );
-
-        } else {
+        else {
 
             feedback.append(
                     "Beginner Level.\n"
@@ -304,33 +613,11 @@ public class ResumeFeedbackGenerator {
                 "📚 Personalized Learning Roadmap:\n"
         );
 
-        if (dataPath) {
+        // =====================================================
+        // FULL STACK ROADMAP
+        // =====================================================
 
-            feedback.append(
-                    "1. Strengthen Python and Pandas\n"
-            );
-
-            feedback.append(
-                    "2. Practice advanced SQL and database querying\n"
-            );
-
-            feedback.append(
-                    "3. Improve Power BI and data visualization skills\n"
-            );
-
-            feedback.append(
-                    "4. Build 2–3 real-world data analytics projects\n"
-            );
-
-            feedback.append(
-                    "5. Create a portfolio showcasing your analysis projects\n"
-            );
-
-            feedback.append(
-                    "Estimated Time: 6–8 Weeks\n"
-            );
-
-        } else if (fullStackPath) {
+        if (fullStackPath) {
 
             feedback.append(
                     "1. Strengthen Java and Spring Boot\n"
@@ -355,8 +642,44 @@ public class ResumeFeedbackGenerator {
             feedback.append(
                     "Estimated Time: 8–10 Weeks\n"
             );
+        }
 
-        } else if (javaPath) {
+        // =====================================================
+        // FRONTEND ROADMAP
+        // =====================================================
+
+        else if (frontendPath) {
+
+            feedback.append(
+                    "1. Strengthen HTML and CSS\n"
+            );
+
+            feedback.append(
+                    "2. Improve JavaScript fundamentals\n"
+            );
+
+            feedback.append(
+                    "3. Build advanced React projects\n"
+            );
+
+            feedback.append(
+                    "4. Improve UI/UX and responsive design\n"
+            );
+
+            feedback.append(
+                    "5. Build and deploy a professional frontend portfolio\n"
+            );
+
+            feedback.append(
+                    "Estimated Time: 6–8 Weeks\n"
+            );
+        }
+
+        // =====================================================
+        // JAVA BACKEND ROADMAP
+        // =====================================================
+
+        else if (strongBackendPath) {
 
             feedback.append(
                     "1. Strengthen Java fundamentals\n"
@@ -381,34 +704,75 @@ public class ResumeFeedbackGenerator {
             feedback.append(
                     "Estimated Time: 6–8 Weeks\n"
             );
+        }
 
-        } else if (frontendPath) {
+        // =====================================================
+        // PYTHON / AI ROADMAP
+        // =====================================================
+
+        else if (pythonAIPath) {
 
             feedback.append(
-                    "1. Strengthen HTML and CSS\n"
+                    "1. Strengthen Python programming\n"
             );
 
             feedback.append(
-                    "2. Improve JavaScript fundamentals\n"
+                    "2. Practice NumPy and Pandas\n"
             );
 
             feedback.append(
-                    "3. Learn React\n"
+                    "3. Build Machine Learning models using Scikit-learn\n"
             );
 
             feedback.append(
-                    "4. Build responsive frontend projects\n"
+                    "4. Learn TensorFlow and deep learning\n"
             );
 
             feedback.append(
-                    "5. Create a frontend portfolio\n"
+                    "5. Build and deploy a Python AI/ML project\n"
+            );
+
+            feedback.append(
+                    "Estimated Time: 8–10 Weeks\n"
+            );
+        }
+
+        // =====================================================
+        // DATA ANALYTICS ROADMAP
+        // =====================================================
+
+        else if (dataPath) {
+
+            feedback.append(
+                    "1. Strengthen Python and Pandas\n"
+            );
+
+            feedback.append(
+                    "2. Practice advanced SQL and database querying\n"
+            );
+
+            feedback.append(
+                    "3. Improve Power BI and data visualization skills\n"
+            );
+
+            feedback.append(
+                    "4. Build 2–3 real-world data analytics projects\n"
+            );
+
+            feedback.append(
+                    "5. Create a portfolio showcasing your analysis projects\n"
             );
 
             feedback.append(
                     "Estimated Time: 6–8 Weeks\n"
             );
+        }
 
-        } else {
+        // =====================================================
+        // GENERAL ROADMAP
+        // =====================================================
+
+        else {
 
             feedback.append(
                     "1. Strengthen programming fundamentals\n"

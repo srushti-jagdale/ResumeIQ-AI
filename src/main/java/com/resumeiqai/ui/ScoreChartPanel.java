@@ -19,6 +19,7 @@ public class ScoreChartPanel extends JPanel {
         // ================= PANEL SETTINGS =================
 
         setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
 
         // ================= DATABASE =================
 
@@ -41,27 +42,31 @@ public class ScoreChartPanel extends JPanel {
         dataset.addValue(
                 lowScoreCount,
                 "Resumes",
-                "Low"
+                "Low (0-49)"
         );
 
         dataset.addValue(
                 mediumScoreCount,
                 "Resumes",
-                "Medium"
+                "Medium (50-79)"
         );
 
         dataset.addValue(
                 highScoreCount,
                 "Resumes",
-                "High"
+                "High (80-100)"
         );
 
         // ================= CREATE CHART =================
+        // IMPORTANT:
+        // Chart title is set to null because
+        // DashboardFrame already displays
+        // "Resume Score Distribution".
 
         JFreeChart chart =
                 ChartFactory.createBarChart(
 
-                        "Resume Score Distribution",
+                        null,
 
                         "Score Category",
 
@@ -74,6 +79,12 @@ public class ScoreChartPanel extends JPanel {
 
         CategoryPlot plot =
                 chart.getCategoryPlot();
+
+        plot.setBackgroundPaint(Color.WHITE);
+
+        plot.setRangeGridlinePaint(
+                new Color(220, 220, 220)
+        );
 
         // ================= BAR RENDERER =================
 
@@ -110,6 +121,10 @@ public class ScoreChartPanel extends JPanel {
                 2,
                 new Color(76, 175, 80)
         );
+
+        // ================= BAR SPACING =================
+
+        renderer.setItemMargin(0.20);
 
         // ================= CHART PANEL =================
 

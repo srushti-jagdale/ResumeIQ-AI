@@ -1,29 +1,174 @@
 package com.resumeiqai.ui;
 
+import com.resumeiqai.database.ResumeDAO;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-
-import com.resumeiqai.database.DBConnection;
-import com.resumeiqai.database.ResumeDAO;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.util.List;
 
 public class HistoryFrame extends JFrame {
 
-    JTable table;
-    DefaultTableModel model;
+    private JTable table;
+    private DefaultTableModel model;
+
+    private JTextField searchField;
+
+    private final ResumeDAO resumeDAO;
 
     public HistoryFrame() {
 
-        setTitle("Resume History");
-        setSize(800, 500);
+        resumeDAO = new ResumeDAO();
+
+        setTitle("ResumeIQ AI - Resume History");
+        setSize(900, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        model = new DefaultTableModel();
+        // =====================================================
+        // MAIN PANEL
+        // =====================================================
+
+        JPanel mainPanel =
+                new JPanel(
+                        new BorderLayout(
+                                10,
+                                10
+                        )
+                );
+
+        mainPanel.setBorder(
+                BorderFactory.createEmptyBorder(
+                        15,
+                        15,
+                        15,
+                        15
+                )
+        );
+
+        // =====================================================
+        // TITLE
+        // =====================================================
+
+        JLabel titleLabel =
+                new JLabel(
+                        "Resume Analysis History"
+                );
+
+        titleLabel.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        22
+                )
+        );
+
+        titleLabel.setHorizontalAlignment(
+                SwingConstants.CENTER
+        );
+
+        // =====================================================
+        // SEARCH PANEL
+        // =====================================================
+
+        JPanel searchPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.CENTER,
+                                10,
+                                5
+                        )
+                );
+
+        JLabel searchLabel =
+                new JLabel(
+                        "Search:"
+                );
+
+        searchLabel.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        14
+                )
+        );
+
+        searchField =
+                new JTextField(
+                        25
+                );
+
+        searchField.setFont(
+                new Font(
+                        "Arial",
+                        Font.PLAIN,
+                        14
+                )
+        );
+
+        JButton searchButton =
+                new JButton(
+                        "Search"
+                );
+
+        JButton clearButton =
+                new JButton(
+                        "Clear"
+                );
+
+        JButton refreshButton =
+                new JButton(
+                        "Refresh"
+                );
+
+        searchPanel.add(searchLabel);
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        searchPanel.add(clearButton);
+        searchPanel.add(refreshButton);
+
+        // =====================================================
+        // TOP PANEL
+        // =====================================================
+
+        JPanel topPanel =
+                new JPanel(
+                        new BorderLayout(
+                                0,
+                                10
+                        )
+                );
+
+        topPanel.add(
+                titleLabel,
+                BorderLayout.NORTH
+        );
+
+        topPanel.add(
+                searchPanel,
+                BorderLayout.CENTER
+        );
+
+        mainPanel.add(
+                topPanel,
+                BorderLayout.NORTH
+        );
+
+        // =====================================================
+        // TABLE MODEL
+        // =====================================================
+
+        model =
+                new DefaultTableModel() {
+
+                    @Override
+                    public boolean isCellEditable(
+                            int row,
+                            int column) {
+
+                        return false;
+                    }
+                };
 
         model.addColumn("ID");
         model.addColumn("File Name");
@@ -31,167 +176,423 @@ public class HistoryFrame extends JFrame {
         model.addColumn("Recommended Role");
         model.addColumn("Date");
 
-        table = new JTable(model);
+        // =====================================================
+        // TABLE
+        // =====================================================
 
-        // ================= SEARCH PANEL =================
+        table =
+                new JTable(model);
 
-        JLabel searchLabel = new JLabel("Search :");
+        table.setFont(
+                new Font(
+                        "Arial",
+                        Font.PLAIN,
+                        13
+                )
+        );
 
-        JTextField searchField = new JTextField(20);
+        table.setRowHeight(28);
 
-        JButton searchButton = new JButton("Search");
+        table.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
 
-        JPanel topPanel = new JPanel();
+        table.setAutoCreateRowSorter(
+                true
+        );
 
-        topPanel.add(searchLabel);
-        topPanel.add(searchField);
-        topPanel.add(searchButton);
+        table.getTableHeader()
+                .setFont(
+                        new Font(
+                                "Arial",
+                                Font.BOLD,
+                                13
+                        )
+                );
 
-        add(topPanel, BorderLayout.NORTH);
+        table.getTableHeader()
+                .setReorderingAllowed(false);
 
-        // ================= TABLE =================
+        // =====================================================
+        // COLUMN WIDTHS
+        // =====================================================
 
-        JScrollPane pane = new JScrollPane(table);
+        table.getColumnModel()
+                .getColumn(0)
+                .setPreferredWidth(50);
 
-        add(pane, BorderLayout.CENTER);
+        table.getColumnModel()
+                .getColumn(1)
+                .setPreferredWidth(230);
 
-        // ================= BUTTON PANEL =================
+        table.getColumnModel()
+                .getColumn(2)
+                .setPreferredWidth(80);
 
-        JButton deleteButton = new JButton("Delete Selected");
+        table.getColumnModel()
+                .getColumn(3)
+                .setPreferredWidth(280);
 
-        JPanel buttonPanel = new JPanel();
+        table.getColumnModel()
+                .getColumn(4)
+                .setPreferredWidth(150);
 
-        buttonPanel.add(deleteButton);
+        // =====================================================
+        // TABLE SCROLL PANE
+        // =====================================================
 
-        add(buttonPanel, BorderLayout.SOUTH);
+        JScrollPane tableScrollPane =
+                new JScrollPane(
+                        table
+                );
 
-        // Load all history
+        tableScrollPane.setBorder(
+                BorderFactory.createTitledBorder(
+                        "Saved Resume Analyses"
+                )
+        );
+
+        mainPanel.add(
+                tableScrollPane,
+                BorderLayout.CENTER
+        );
+
+        // =====================================================
+        // BOTTOM BUTTONS
+        // =====================================================
+
+        JButton viewDetailsButton =
+                new JButton(
+                        "View Details"
+                );
+
+        viewDetailsButton.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        13
+                )
+        );
+
+        JButton deleteButton =
+                new JButton(
+                        "Delete Selected"
+                );
+
+        deleteButton.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        13
+                )
+        );
+
+        JPanel bottomPanel =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.CENTER,
+                                10,
+                                5
+                        )
+                );
+
+        bottomPanel.add(
+                viewDetailsButton
+        );
+
+        bottomPanel.add(
+                deleteButton
+        );
+
+        mainPanel.add(
+                bottomPanel,
+                BorderLayout.SOUTH
+        );
+
+        // =====================================================
+        // LOAD HISTORY
+        // =====================================================
+
         loadHistory("");
 
-        // ================= DELETE BUTTON =================
+        // =====================================================
+        // SEARCH BUTTON
+        // =====================================================
 
-        deleteButton.addActionListener(e -> {
+        searchButton.addActionListener(e -> {
 
-            int selectedRow = table.getSelectedRow();
+            String keyword =
+                    searchField
+                            .getText()
+                            .trim();
 
-            if (selectedRow == -1) {
+            loadHistory(keyword);
+        });
+
+        // =====================================================
+        // ENTER KEY SEARCH
+        // =====================================================
+
+        searchField.addActionListener(e -> {
+
+            String keyword =
+                    searchField
+                            .getText()
+                            .trim();
+
+            loadHistory(keyword);
+        });
+
+        // =====================================================
+        // CLEAR BUTTON
+        // =====================================================
+
+        clearButton.addActionListener(e -> {
+
+            searchField.setText("");
+
+            loadHistory("");
+        });
+
+        // =====================================================
+        // REFRESH BUTTON
+        // =====================================================
+
+        refreshButton.addActionListener(e -> {
+
+            String keyword =
+                    searchField
+                            .getText()
+                            .trim();
+
+            loadHistory(keyword);
+        });
+
+        // =====================================================
+        // VIEW DETAILS BUTTON
+        // =====================================================
+
+        viewDetailsButton.addActionListener(e -> {
+
+            int selectedViewRow =
+                    table.getSelectedRow();
+
+            if (selectedViewRow == -1) {
 
                 JOptionPane.showMessageDialog(
                         this,
-                        "Please select a record first."
+                        "Please select a record first.",
+                        "No Record Selected",
+                        JOptionPane.WARNING_MESSAGE
                 );
 
                 return;
-
             }
 
-            int confirm = JOptionPane.showConfirmDialog(
-                    this,
-                    "Are you sure you want to delete this record?",
-                    "Confirm Delete",
-                    JOptionPane.YES_NO_OPTION
-            );
+            try {
 
-            if (confirm == JOptionPane.YES_OPTION) {
+                int selectedModelRow =
+                        table.convertRowIndexToModel(
+                                selectedViewRow
+                        );
 
-                int id = Integer.parseInt(
-                        model.getValueAt(selectedRow, 0).toString()
+                int id =
+                        Integer.parseInt(
+                                model.getValueAt(
+                                                selectedModelRow,
+                                                0
+                                        )
+                                        .toString()
+                        );
+
+                new ResumeDetailsFrame(
+                        id
                 );
 
-                ResumeDAO dao = new ResumeDAO();
+            } catch (Exception ex) {
 
-                if (dao.deleteResumeAnalysis(id)) {
+                ex.printStackTrace();
 
-                    model.removeRow(selectedRow);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Unable to open resume details:\n"
+                                + ex.getMessage(),
+                        "Details Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
+
+        // =====================================================
+        // DELETE BUTTON
+        // =====================================================
+
+        deleteButton.addActionListener(e -> {
+
+            int selectedViewRow =
+                    table.getSelectedRow();
+
+            if (selectedViewRow == -1) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Please select a record first.",
+                        "No Record Selected",
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                return;
+            }
+
+            int confirm =
+                    JOptionPane.showConfirmDialog(
+                            this,
+                            "Are you sure you want to delete this record?",
+                            "Confirm Delete",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE
+                    );
+
+            if (
+                    confirm !=
+                            JOptionPane.YES_OPTION
+            ) {
+
+                return;
+            }
+
+            try {
+
+                int selectedModelRow =
+                        table.convertRowIndexToModel(
+                                selectedViewRow
+                        );
+
+                int id =
+                        Integer.parseInt(
+                                model.getValueAt(
+                                                selectedModelRow,
+                                                0
+                                        )
+                                        .toString()
+                        );
+
+                boolean deleted =
+                        resumeDAO.deleteResumeAnalysis(
+                                id
+                        );
+
+                if (deleted) {
+
+                    model.removeRow(
+                            selectedModelRow
+                    );
 
                     JOptionPane.showMessageDialog(
                             this,
-                            "Record deleted successfully!"
+                            "Record deleted successfully!",
+                            "Delete Successful",
+                            JOptionPane.INFORMATION_MESSAGE
                     );
 
                 } else {
 
                     JOptionPane.showMessageDialog(
                             this,
-                            "Failed to delete record."
+                            "Failed to delete record.",
+                            "Delete Failed",
+                            JOptionPane.ERROR_MESSAGE
                     );
-
                 }
 
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Error while deleting record:\n"
+                                + ex.getMessage(),
+                        "Delete Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
-
         });
 
-        // ================= SEARCH BUTTON =================
+        // =====================================================
+        // ADD MAIN PANEL
+        // =====================================================
 
-        searchButton.addActionListener(e -> {
+        add(
+                mainPanel
+        );
 
-            String keyword = searchField.getText().trim();
-
-            loadHistory(keyword);
-
-        });
+        // =====================================================
+        // SHOW WINDOW
+        // =====================================================
 
         setVisible(true);
-
     }
 
-    // ================= LOAD HISTORY =================
+    // =========================================================
+    // LOAD HISTORY
+    // =========================================================
 
-    private void loadHistory(String keyword) {
+    private void loadHistory(
+            String keyword) {
 
         try {
 
             model.setRowCount(0);
 
-            Connection connection = DBConnection.getConnection();
+            List<String[]> results =
+                    resumeDAO.searchResumeAnalysis(
+                            keyword
+                    );
 
-            String sql;
+            for (String[] row : results) {
 
-            PreparedStatement statement;
+                if (row == null) {
+                    continue;
+                }
 
-            if (keyword == null || keyword.isEmpty()) {
+                model.addRow(
+                        new Object[]{
 
-                sql = "SELECT * FROM resume_analysis";
+                                row.length > 0
+                                        ? row[0]
+                                        : "",
 
-                statement = connection.prepareStatement(sql);
+                                row.length > 1
+                                        ? row[1]
+                                        : "",
 
-            } else {
+                                row.length > 2
+                                        ? row[2]
+                                        : "",
 
-                sql = "SELECT * FROM resume_analysis WHERE file_name LIKE ?";
+                                row.length > 3
+                                        ? row[3]
+                                        : "",
 
-                statement = connection.prepareStatement(sql);
-
-                statement.setString(1, "%" + keyword + "%");
-
+                                row.length > 4
+                                        ? row[4]
+                                        : ""
+                        }
+                );
             }
-
-            ResultSet rs = statement.executeQuery();
-
-            while (rs.next()) {
-
-                model.addRow(new Object[]{
-
-                        rs.getInt("id"),
-                        rs.getString("file_name"),
-                        rs.getInt("resume_score"),
-                        rs.getString("recommended_role"),
-                        rs.getTimestamp("analysis_date")
-
-                });
-
-            }
-
-            rs.close();
-            statement.close();
-            connection.close();
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unable to load resume history:\n"
+                            + e.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
-
     }
-
 }

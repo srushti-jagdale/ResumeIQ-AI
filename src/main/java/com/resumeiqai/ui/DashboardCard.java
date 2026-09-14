@@ -10,43 +10,122 @@ public class DashboardCard extends JPanel {
 
     public DashboardCard(String title, String value, Color color) {
 
-        setPreferredSize(new Dimension(220,120));
+        setPreferredSize(new Dimension(260, 130));
+        setMinimumSize(new Dimension(220, 120));
         setBackground(color);
 
-        setBorder(BorderFactory.createLineBorder(Color.GRAY,2));
+        setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(
+                                new Color(210, 210, 210),
+                                1
+                        ),
+                        BorderFactory.createEmptyBorder(
+                                12, 12, 12, 12
+                        )
+                )
+        );
 
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(5, 10));
 
-        titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        // ==============================
+        // TITLE
+        // ==============================
 
-        valueLabel = new JLabel(value, SwingConstants.CENTER);
-        valueLabel.setFont(new Font("Arial", Font.BOLD, 26));
+        titleLabel = new JLabel(
+                title,
+                SwingConstants.CENTER
+        );
 
-        add(titleLabel, BorderLayout.NORTH);
-        add(valueLabel, BorderLayout.CENTER);
+        titleLabel.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        17
+                )
+        );
+
+        titleLabel.setForeground(
+                new Color(45, 45, 45)
+        );
+
+        // ==============================
+        // VALUE
+        // ==============================
+
+        valueLabel = new JLabel(
+                value,
+                SwingConstants.CENTER
+        );
+
+        valueLabel.setFont(
+                new Font(
+                        "Arial",
+                        Font.BOLD,
+                        28
+                )
+        );
+
+        valueLabel.setForeground(
+                new Color(30, 30, 30)
+        );
+
+        // ==============================
+        // ADD COMPONENTS
+        // ==============================
+
+        add(
+                titleLabel,
+                BorderLayout.NORTH
+        );
+
+        add(
+                valueLabel,
+                BorderLayout.CENTER
+        );
     }
+
+    // ==============================
+    // UPDATE CARD VALUE
+    // ==============================
 
     public void setValue(String value) {
 
-        // If text is long (like job roles), wrap it nicely
+        if (value == null) {
+            value = "-";
+        }
+
+        // Long values such as job roles
         if (value.length() > 20) {
 
-            valueLabel.setFont(new Font("Arial", Font.BOLD, 18));
+            valueLabel.setFont(
+                    new Font(
+                            "Arial",
+                            Font.BOLD,
+                            18
+                    )
+            );
 
             valueLabel.setText(
-                    "<html><center>"
-                            + value.replace("\n", "<br>")
-                            + "</center></html>"
+                    "<html><div style='text-align:center;'>"
+                            + value.replace(
+                            "\n",
+                            "<br>"
+                    )
+                            + "</div></html>"
             );
 
         } else {
 
-            valueLabel.setFont(new Font("Arial", Font.BOLD, 26));
+            valueLabel.setFont(
+                    new Font(
+                            "Arial",
+                            Font.BOLD,
+                            28
+                    )
+            );
+
             valueLabel.setText(value);
-
         }
-
     }
-
 }

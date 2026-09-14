@@ -6,34 +6,49 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
-    // Database URL
-    private static final String URL = "jdbc:mysql://localhost:3306/resumeiqai";
+    // ==============================
+    // Database Configuration
+    // ==============================
 
-    // MySQL Username
-    private static final String USERNAME = "root";
+    private static final String URL =
+            "jdbc:mysql://localhost:3306/resumeiqai";
 
-    // MySQL Password
-    // Replace YOUR_PASSWORD with your actual MySQL root password
-    private static final String PASSWORD = "klrahul18";
+    private static final String USERNAME =
+            "root";
 
-    // Method to establish connection
+    private static final String PASSWORD =
+            "klrahul18";
+
+    // ==============================
+    // Establish Database Connection
+    // ==============================
+
     public static Connection getConnection() {
-
-        Connection connection = null;
 
         try {
 
-            connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+            Connection connection =
+                    DriverManager.getConnection(
+                            URL,
+                            USERNAME,
+                            PASSWORD
+                    );
 
-            System.out.println("✅ Database Connected Successfully!");
+            System.out.println(
+                    "✅ Database Connected Successfully!"
+            );
+
+            return connection;
 
         } catch (SQLException e) {
 
-            System.out.println("❌ Database Connection Failed!");
+            System.out.println(
+                    "❌ Database Connection Failed!"
+            );
+
             e.printStackTrace();
 
+            return null;
         }
-
-        return connection;
     }
 }

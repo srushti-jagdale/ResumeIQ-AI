@@ -7,6 +7,8 @@ public class ResumeAnalyzer {
     private final JobRoleRecommender jobRoleRecommender;
     private final ResumeSuggestionGenerator suggestionGenerator;
     private final ResumeFeedbackGenerator feedbackGenerator;
+    private final ATSAnalyzer atsAnalyzer;
+    private final ATSKeywordAnalyzer atsKeywordAnalyzer;
 
     public ResumeAnalyzer() {
 
@@ -15,6 +17,8 @@ public class ResumeAnalyzer {
         jobRoleRecommender = new JobRoleRecommender();
         suggestionGenerator = new ResumeSuggestionGenerator();
         feedbackGenerator = new ResumeFeedbackGenerator();
+        atsAnalyzer = new ATSAnalyzer();
+        atsKeywordAnalyzer = new ATSKeywordAnalyzer();
     }
 
     public String analyzeResume(String resumeText) {
@@ -41,12 +45,6 @@ public class ResumeAnalyzer {
 
         String[] skills =
                 skillAnalyzer.getSkillsForCareer(careerArea);
-
-        int foundSkills =
-                skillAnalyzer.countFoundSkills(
-                        resumeText,
-                        skills
-                );
 
         String skillsFound =
                 skillAnalyzer.getSkillsFound(
@@ -126,7 +124,24 @@ public class ResumeAnalyzer {
                 feedbackGenerator.generateFeedback(
                         resumeText
                 );
+// =====================================================
+// ATS ANALYSIS
+// =====================================================
 
+        String atsReport =
+                atsAnalyzer.analyzeATS(
+                        resumeText,
+                        careerArea
+                );
+        // =====================================================
+// ATS KEYWORD ANALYSIS
+// =====================================================
+
+        ATSKeywordAnalyzer.ATSResult keywordResult =
+                atsKeywordAnalyzer.analyze(
+                        resumeText,
+                        careerArea
+                );
         // =====================================================
         // BUILD REPORT
         // =====================================================
@@ -224,7 +239,8 @@ public class ResumeAnalyzer {
                 "\nRecommended Job Roles:\n"
         );
 
-        if (recommendedRoles.isEmpty()) {
+        if (recommendedRoles == null ||
+                recommendedRoles.trim().isEmpty()) {
 
             report.append(
                     "No suitable job role found.\n"
@@ -243,7 +259,8 @@ public class ResumeAnalyzer {
                 "\nSuggestions:\n"
         );
 
-        if (suggestions.isEmpty()) {
+        if (suggestions == null ||
+                suggestions.trim().isEmpty()) {
 
             report.append(
                     "• Your resume contains most of the recommended skills and sections.\n"
@@ -258,7 +275,91 @@ public class ResumeAnalyzer {
         // AI FEEDBACK
         // =====================================================
 
-        report.append(feedback);
+        if (feedback != null &&
+                !feedback.trim().isEmpty()) {
+
+            report.append("\n");
+            report.append(feedback);
+        }
+// =====================================================
+// ATS ANALYSIS
+// =====================================================
+
+        report.append(atsReport);
+
+// =====================================================
+// ATS KEYWORD ANALYSIS REPORT
+// =====================================================
+
+        report.append(
+                "\n\n===== ATS Keyword Analysis =====\n\n"
+        );
+
+        report.append(
+                        "Keyword Match Score : "
+                )
+                .append(
+                        keywordResult.getScore()
+                )
+                .append("/100\n\n");
+
+        report.append(
+                "Keywords Found:\n"
+        );
+
+        if (
+                keywordResult
+                        .getFoundKeywords()
+                        .isEmpty()
+        ) {
+
+            report.append(
+                    "None\n"
+            );
+
+        } else {
+
+            for (
+                    String keyword :
+                    keywordResult.getFoundKeywords()
+            ) {
+
+                report.append(
+                                "✓ "
+                        )
+                        .append(keyword)
+                        .append("\n");
+            }
+        }
+
+        report.append(
+                "\nKeywords Missing:\n"
+        );
+
+        if (
+                keywordResult
+                        .getMissingKeywords()
+                        .isEmpty()
+        ) {
+
+            report.append(
+                    "None\n"
+            );
+
+        } else {
+
+            for (
+                    String keyword :
+                    keywordResult.getMissingKeywords()
+            ) {
+
+                report.append(
+                                "✗ "
+                        )
+                        .append(keyword)
+                        .append("\n");
+            }
+        }
 
         return report.toString();
     }
@@ -274,10 +375,11 @@ public class ResumeAnalyzer {
         int frontendScore = 0;
         int pythonAIScore = 0;
         int databaseScore = 0;
+        int fullStackScore = 0;
 
-        // -----------------------------------------------------
+        // =====================================================
         // DATA ANALYTICS
-        // -----------------------------------------------------
+        // =====================================================
 
         if (text.contains("data analyst")) {
             dataAnalyticsScore += 5;
@@ -311,9 +413,9 @@ public class ResumeAnalyzer {
             dataAnalyticsScore += 2;
         }
 
-        // -----------------------------------------------------
+        // =====================================================
         // JAVA BACKEND
-        // -----------------------------------------------------
+        // =====================================================
 
         if (text.contains("java")) {
             javaScore += 4;
@@ -327,8 +429,8 @@ public class ResumeAnalyzer {
             javaScore += 3;
         }
 
-        if (text.contains("rest api")
-                || text.contains("restful api")) {
+        if (text.contains("rest api") ||
+                text.contains("restful api")) {
 
             javaScore += 3;
         }
@@ -337,9 +439,9 @@ public class ResumeAnalyzer {
             javaScore += 2;
         }
 
-        // -----------------------------------------------------
+        // =====================================================
         // FRONTEND
-        // -----------------------------------------------------
+        // =====================================================
 
         if (text.contains("html")) {
             frontendScore += 3;
@@ -365,9 +467,28 @@ public class ResumeAnalyzer {
             frontendScore += 3;
         }
 
-        // -----------------------------------------------------
+        // =====================================================
+        // FULL STACK
+        // =====================================================
+
+        boolean hasJavaBackend =
+                text.contains("java") &&
+                        text.contains("spring boot") &&
+                        text.contains("rest api");
+
+        boolean hasFrontend =
+                text.contains("html") &&
+                        text.contains("css") &&
+                        text.contains("javascript") &&
+                        text.contains("react");
+
+        if (hasJavaBackend && hasFrontend) {
+            fullStackScore = 100;
+        }
+
+        // =====================================================
         // PYTHON / AI
-        // -----------------------------------------------------
+        // =====================================================
 
         if (text.contains("python")) {
             pythonAIScore += 4;
@@ -377,8 +498,8 @@ public class ResumeAnalyzer {
             pythonAIScore += 5;
         }
 
-        if (text.contains("artificial intelligence")
-                || text.contains(" ai ")) {
+        if (text.contains("artificial intelligence") ||
+                text.contains(" ai ")) {
 
             pythonAIScore += 3;
         }
@@ -387,8 +508,8 @@ public class ResumeAnalyzer {
             pythonAIScore += 4;
         }
 
-        if (text.contains("scikit-learn")
-                || text.contains("sklearn")) {
+        if (text.contains("scikit-learn") ||
+                text.contains("sklearn")) {
 
             pythonAIScore += 4;
         }
@@ -397,9 +518,9 @@ public class ResumeAnalyzer {
             pythonAIScore += 2;
         }
 
-        // -----------------------------------------------------
+        // =====================================================
         // DATABASE
-        // -----------------------------------------------------
+        // =====================================================
 
         if (text.contains("sql")) {
             databaseScore += 4;
@@ -427,25 +548,32 @@ public class ResumeAnalyzer {
 
         int highestScore =
                 Math.max(
-                        dataAnalyticsScore,
+                        fullStackScore,
                         Math.max(
-                                javaScore,
+                                dataAnalyticsScore,
                                 Math.max(
-                                        frontendScore,
+                                        javaScore,
                                         Math.max(
-                                                pythonAIScore,
-                                                databaseScore
+                                                frontendScore,
+                                                Math.max(
+                                                        pythonAIScore,
+                                                        databaseScore
+                                                )
                                         )
                                 )
                         )
                 );
 
         // =====================================================
-        // DEFAULT
+        // CAREER AREA
         // =====================================================
 
         if (highestScore == 0) {
             return "General Software Development";
+        }
+
+        if (fullStackScore == highestScore) {
+            return "Full Stack Development";
         }
 
         if (dataAnalyticsScore == highestScore) {

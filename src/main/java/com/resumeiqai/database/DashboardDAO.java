@@ -3,264 +3,406 @@ package com.resumeiqai.database;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class DashboardDAO {
 
-    // ==============================
-    // Total Resumes
-    // ==============================
+    // =====================================================
+    // TOTAL RESUMES
+    // =====================================================
 
     public int getTotalResumes() {
 
-        try {
+        String sql =
+                "SELECT COUNT(*) FROM resume_analysis";
 
-            Connection connection = DBConnection.getConnection();
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
 
-            String sql = "SELECT COUNT(*) FROM resume_analysis";
+                PreparedStatement statement =
+                        connection.prepareStatement(sql);
 
-            PreparedStatement statement = connection.prepareStatement(sql);
-
-            ResultSet rs = statement.executeQuery();
+                ResultSet rs =
+                        statement.executeQuery()
+        ) {
 
             if (rs.next()) {
 
                 return rs.getInt(1);
-
             }
-
-            rs.close();
-            statement.close();
-            connection.close();
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            System.out.println(
+                    "Failed to get total resumes."
+            );
 
+            e.printStackTrace();
         }
 
         return 0;
-
     }
 
-    // ==============================
-    // Highest Resume Score
-    // ==============================
+    // =====================================================
+    // HIGHEST RESUME SCORE
+    // =====================================================
 
     public int getHighestScore() {
 
-        try {
+        String sql =
+                "SELECT MAX(resume_score) FROM resume_analysis";
 
-            Connection connection = DBConnection.getConnection();
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
 
-            String sql = "SELECT MAX(resume_score) FROM resume_analysis";
+                PreparedStatement statement =
+                        connection.prepareStatement(sql);
 
-            PreparedStatement statement = connection.prepareStatement(sql);
-
-            ResultSet rs = statement.executeQuery();
+                ResultSet rs =
+                        statement.executeQuery()
+        ) {
 
             if (rs.next()) {
 
                 return rs.getInt(1);
-
             }
-
-            rs.close();
-            statement.close();
-            connection.close();
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            System.out.println(
+                    "Failed to get highest score."
+            );
 
+            e.printStackTrace();
         }
 
         return 0;
-
     }
 
-    // ==============================
-    // Average Resume Score
-    // ==============================
+    // =====================================================
+    // AVERAGE RESUME SCORE
+    // =====================================================
 
     public double getAverageScore() {
 
-        try {
+        String sql =
+                "SELECT AVG(resume_score) FROM resume_analysis";
 
-            Connection connection = DBConnection.getConnection();
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
 
-            String sql = "SELECT AVG(resume_score) FROM resume_analysis";
+                PreparedStatement statement =
+                        connection.prepareStatement(sql);
 
-            PreparedStatement statement = connection.prepareStatement(sql);
-
-            ResultSet rs = statement.executeQuery();
+                ResultSet rs =
+                        statement.executeQuery()
+        ) {
 
             if (rs.next()) {
 
                 return rs.getDouble(1);
-
             }
-
-            rs.close();
-            statement.close();
-            connection.close();
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            System.out.println(
+                    "Failed to get average score."
+            );
 
+            e.printStackTrace();
         }
 
         return 0;
-
     }
 
-    // ==============================
-    // Most Recommended Role
-    // ==============================
+    // =====================================================
+    // MOST RECOMMENDED ROLE
+    // =====================================================
 
     public String getTopRole() {
 
-        try {
+        String sql =
+                "SELECT recommended_role, COUNT(*) AS total " +
+                        "FROM resume_analysis " +
+                        "GROUP BY recommended_role " +
+                        "ORDER BY total DESC " +
+                        "LIMIT 1";
 
-            Connection connection = DBConnection.getConnection();
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
 
-            String sql =
-                    "SELECT recommended_role, COUNT(*) AS total " +
-                            "FROM resume_analysis " +
-                            "GROUP BY recommended_role " +
-                            "ORDER BY total DESC " +
-                            "LIMIT 1";
+                PreparedStatement statement =
+                        connection.prepareStatement(sql);
 
-            PreparedStatement statement = connection.prepareStatement(sql);
-
-            ResultSet rs = statement.executeQuery();
+                ResultSet rs =
+                        statement.executeQuery()
+        ) {
 
             if (rs.next()) {
 
-                return rs.getString("recommended_role");
-
+                return rs.getString(
+                        "recommended_role"
+                );
             }
-
-            rs.close();
-            statement.close();
-            connection.close();
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            System.out.println(
+                    "Failed to get top role."
+            );
 
+            e.printStackTrace();
         }
 
         return "No Data";
-
     }
 
-    // ==============================
-    // Low Score Count (0 - 49)
-    // ==============================
+    // =====================================================
+    // LOW RESUME SCORE COUNT (0 - 49)
+    // =====================================================
 
     public int getLowScoreCount() {
 
-        try {
+        String sql =
+                "SELECT COUNT(*) FROM resume_analysis " +
+                        "WHERE resume_score BETWEEN 0 AND 49";
 
-            Connection connection = DBConnection.getConnection();
-
-            String sql = "SELECT COUNT(*) FROM resume_analysis WHERE resume_score BETWEEN 0 AND 49";
-
-            PreparedStatement statement = connection.prepareStatement(sql);
-
-            ResultSet rs = statement.executeQuery();
-
-            if (rs.next()) {
-
-                return rs.getInt(1);
-
-            }
-
-            rs.close();
-            statement.close();
-            connection.close();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-
-        return 0;
-
+        return getCount(sql);
     }
 
-    // ==============================
-    // Medium Score Count (50 - 79)
-    // ==============================
+    // =====================================================
+    // MEDIUM RESUME SCORE COUNT (50 - 79)
+    // =====================================================
 
     public int getMediumScoreCount() {
 
-        try {
+        String sql =
+                "SELECT COUNT(*) FROM resume_analysis " +
+                        "WHERE resume_score BETWEEN 50 AND 79";
 
-            Connection connection = DBConnection.getConnection();
-
-            String sql = "SELECT COUNT(*) FROM resume_analysis WHERE resume_score BETWEEN 50 AND 79";
-
-            PreparedStatement statement = connection.prepareStatement(sql);
-
-            ResultSet rs = statement.executeQuery();
-
-            if (rs.next()) {
-
-                return rs.getInt(1);
-
-            }
-
-            rs.close();
-            statement.close();
-            connection.close();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
-
-        return 0;
-
+        return getCount(sql);
     }
 
-    // ==============================
-    // High Score Count (80 - 100)
-    // ==============================
+    // =====================================================
+    // HIGH RESUME SCORE COUNT (80 - 100)
+    // =====================================================
 
     public int getHighScoreCount() {
 
-        try {
+        String sql =
+                "SELECT COUNT(*) FROM resume_analysis " +
+                        "WHERE resume_score BETWEEN 80 AND 100";
 
-            Connection connection = DBConnection.getConnection();
+        return getCount(sql);
+    }
 
-            String sql = "SELECT COUNT(*) FROM resume_analysis WHERE resume_score BETWEEN 80 AND 100";
+    // =====================================================
+    // AVERAGE ATS SCORE
+    // =====================================================
 
-            PreparedStatement statement = connection.prepareStatement(sql);
+    public double getAverageATSScore() {
 
-            ResultSet rs = statement.executeQuery();
+        String sql =
+                "SELECT AVG(ats_score) FROM resume_analysis";
+
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql);
+
+                ResultSet rs =
+                        statement.executeQuery()
+        ) {
+
+            if (rs.next()) {
+
+                return rs.getDouble(1);
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Failed to get average ATS score."
+            );
+
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    // =====================================================
+    // HIGHEST ATS SCORE
+    // =====================================================
+
+    public int getHighestATSScore() {
+
+        String sql =
+                "SELECT MAX(ats_score) FROM resume_analysis";
+
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql);
+
+                ResultSet rs =
+                        statement.executeQuery()
+        ) {
 
             if (rs.next()) {
 
                 return rs.getInt(1);
-
             }
-
-            rs.close();
-            statement.close();
-            connection.close();
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            System.out.println(
+                    "Failed to get highest ATS score."
+            );
 
+            e.printStackTrace();
         }
 
         return 0;
-
     }
 
+    // =====================================================
+    // LOW ATS SCORE COUNT (0 - 49)
+    // =====================================================
+
+    public int getLowATSScoreCount() {
+
+        String sql =
+                "SELECT COUNT(*) FROM resume_analysis " +
+                        "WHERE ats_score BETWEEN 0 AND 49";
+
+        return getCount(sql);
+    }
+
+    // =====================================================
+    // MEDIUM ATS SCORE COUNT (50 - 79)
+    // =====================================================
+
+    public int getMediumATSScoreCount() {
+
+        String sql =
+                "SELECT COUNT(*) FROM resume_analysis " +
+                        "WHERE ats_score BETWEEN 50 AND 79";
+
+        return getCount(sql);
+    }
+
+    // =====================================================
+    // HIGH ATS SCORE COUNT (80 - 100)
+    // =====================================================
+
+    public int getHighATSScoreCount() {
+
+        String sql =
+                "SELECT COUNT(*) FROM resume_analysis " +
+                        "WHERE ats_score BETWEEN 80 AND 100";
+
+        return getCount(sql);
+    }
+
+    // =====================================================
+    // ROLE DISTRIBUTION
+    // =====================================================
+
+    public Map<String, Integer> getRoleDistribution() {
+
+        Map<String, Integer> roleDistribution =
+                new LinkedHashMap<>();
+
+        String sql =
+                "SELECT recommended_role, COUNT(*) AS total " +
+                        "FROM resume_analysis " +
+                        "WHERE recommended_role IS NOT NULL " +
+                        "AND recommended_role <> '' " +
+                        "GROUP BY recommended_role " +
+                        "ORDER BY total DESC";
+
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql);
+
+                ResultSet rs =
+                        statement.executeQuery()
+        ) {
+
+            while (rs.next()) {
+
+                String role =
+                        rs.getString(
+                                "recommended_role"
+                        );
+
+                int count =
+                        rs.getInt(
+                                "total"
+                        );
+
+                roleDistribution.put(
+                        role,
+                        count
+                );
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Failed to get role distribution."
+            );
+
+            e.printStackTrace();
+        }
+
+        return roleDistribution;
+    }
+
+    // =====================================================
+    // REUSABLE COUNT METHOD
+    // =====================================================
+
+    private int getCount(String sql) {
+
+        try (
+                Connection connection =
+                        DBConnection.getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql);
+
+                ResultSet rs =
+                        statement.executeQuery()
+        ) {
+
+            if (rs.next()) {
+
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Failed to get count."
+            );
+
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
 }
